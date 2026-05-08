@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # La base de datos para todos (aunque cada uno usará su propia DB interna)
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_colegio
+    ports:
+      - "27017:27017"
+
+  # Microservicio de Usuarios
+  usuarios-ms:
+    build: ./microservicios/servicio-usuarios
+    container_name: usuarios-ms
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongodb
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/db_usuarios
+
+  # Microservicio Académico
+  academico-ms:
+    build: ./microservicios/servicio-academico
+    container_name: academico-ms
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mongodb
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/db_academico
+
+  # Microservicio Asistencia
+  asistencia-ms:
+    build: ./microservicios/servicio-asistencia
+    container_name: asistencia-ms
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mongodb
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/db_asistencia
+
+  # El BFF (Puerta de entrada)
+  bff:
+    build: ./bff-colegio
+    container_name: bff-colegio
+    ports:
+      - "8080:8080"
+    depends_on:
+      - usuarios-ms
+      - academico-ms
+      - asistencia-ms
