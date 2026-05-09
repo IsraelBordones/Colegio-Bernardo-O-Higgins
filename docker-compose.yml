@@ -1,16 +1,15 @@
 version: '3.8'
 
 services:
-  # La base de datos para todos (aunque cada uno usará su propia DB interna)
   mongodb:
     image: mongo:latest
     container_name: mongodb_colegio
     ports:
       - "27017:27017"
 
-  # Microservicio de Usuarios
   usuarios-ms:
-    build: ./microservicios/servicio-usuarios
+    # Ajustado: entramos a la subcarpeta donde está el Dockerfile
+    build: ./microservicios/usuarios/servicio-usuarios/servicio-usuarios
     container_name: usuarios-ms
     ports:
       - "8081:8081"
@@ -19,9 +18,9 @@ services:
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/db_usuarios
 
-  # Microservicio Académico
   academico-ms:
-    build: ./microservicios/servicio-academico
+    # Ajustado según tu ruta de find
+    build: ./microservicios/academico/servicio-academico
     container_name: academico-ms
     ports:
       - "8082:8082"
@@ -30,9 +29,9 @@ services:
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/db_academico
 
-  # Microservicio Asistencia
   asistencia-ms:
-    build: ./microservicios/servicio-asistencia
+    # Ajustado según tu ruta de find
+    build: ./microservicios/asistencia/servicio-asistencia
     container_name: asistencia-ms
     ports:
       - "8083:8083"
@@ -41,9 +40,9 @@ services:
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/db_asistencia
 
-  # El BFF (Puerta de entrada)
   bff:
-    build: ./bff-colegio
+    # Ajustado: entramos a la subcarpeta bff-colegio
+    build: ./bff/bff-colegio
     container_name: bff-colegio
     ports:
       - "8080:8080"
