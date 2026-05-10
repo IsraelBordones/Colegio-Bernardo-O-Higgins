@@ -1,7 +1,8 @@
 package cl.colegio.ohiggins.servicio_usuarios.controller;
 
-import cl.colegio.ohiggins.usuarios.model.Usuario;
-import cl.colegio.ohiggins.usuarios.service.UsuarioService;
+import cl.colegio.ohiggins.servicio_usuarios.model.Usuario;
+import cl.colegio.ohiggins.servicio_usuarios.service.UsuarioService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,13 @@ public class UsuarioController {
     public List<Usuario> listar() {
         return usuarioService.obtenerTodos();
     }
+
+    // Listar alumnos por curso
+    @GetMapping("/alumnos")
+    public List<Usuario> listarAlumnosPorCurso(@RequestParam int cursoId) {
+        return usuarioService.listarAlumnosPorCursoId(cursoId);
+    }
+
 
     // Cuando alguien haga un POST a /api/usuarios con un JSON de usuario
     @PostMapping
