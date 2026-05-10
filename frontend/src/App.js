@@ -1,60 +1,46 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
-import LoginPage from './pages/LoginPage'; 
-import AsistenciaPage from './pages/AsistenciaPage';
-import CalificacionesPage from './pages/CalificacionesPage'; // NUEVA
 import Navbar from './components/Navbar';
+import LoginPage from './pages/LoginPage';
+
+// Importamos tus páginas reales
+import AsistenciaPage from './pages/AsistenciaPage';
+import CalificacionesPage from './pages/CalificacionesPage';
+
+// Dashboards simples
+const DashboardProfesor = () => (
+    <div style={{ padding: '40px', textAlign: 'center' }}>
+        <h1>Área del Docente</h1>
+        <p>Selecciona una opción en el menú superior para comenzar.</p>
+    </div>
+);
+
+const DashboardAlumno = () => (
+    <div style={{ padding: '40px', textAlign: 'center' }}>
+        <h1>Área del Estudiante</h1>
+        <p>Aquí podrás revisar tus calificaciones actuales.</p>
+    </div>
+);
 
 function App() {
-  const [user, setUser] = useState({
-    nombre: 'William Cáceres',
-    role: 'alumno' // Prueba cambiando a 'alumno'
-  });
-
-  const logout = () => {
-    setUser(null);
-  };
-
   return (
     <Router>
-      <Navbar user={user} onLogout={logout} />
-
-      <div style={{ marginTop: '20px' }}>
-        <Routes>
-          <Route path="/" element={<LoginPage setUser={setUser} />} />
-
-          {/* RUTA ASISTENCIA: Solo Profesores */}
-          <Route 
-            path="/asistencia" 
-            element={
-              user?.role === 'profesor' ? <AsistenciaPage /> : <Navigate to="/home" />
-            } 
-          />
-
-          {/* RUTA CALIFICACIONES: Todos los logueados */}
-          <Route 
-            path="/calificaciones" 
-            element={
-              user ? <CalificacionesPage user={user} /> : <Navigate to="/" />
-            } 
-          />
-
-          <Route 
-            path="/home" 
-            element={
-              user ? (
-                <div style={{ textAlign: 'center', marginTop: '50px' }}>
-                  <h1>Bienvenido, {user.nombre}</h1>
-                  <p>Panel de control del {user.role}</p>
-                </div>
-              ) : <Navigate to="/" />
-            } 
-          />
-
-          <Route path="*" element={<Navigate to={user ? "/home" : "/"} />} />
-        </Routes>
-      </div>
+      <Navbar />
+      
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        
+        {/* Rutas de Dashboard */}
+        <Route path="/dashboard-profesor" element={<DashboardProfesor />} />
+        <Route path="/dashboard-alumno" element={<DashboardAlumno />} />
+        
+        {/* Rutas de Funcionalidades para el Profesor */}
+        <Route path="/asistencia" element={<AsistenciaPage />} />
+        <Route path="/calificaciones" element={<CalificacionesPage />} />
+        
+        {/* Redirección por defecto */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </Router>
   );
 }

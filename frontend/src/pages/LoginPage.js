@@ -1,73 +1,93 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../services/authService'; // El servicio que creamos antes
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
+    // Estados para capturar lo que el usuario escribe
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    // Aquí simulamos la validación
-    console.log("Login intentado con:", email);
-    alert("Sesión iniciada correctamente.");
-    navigate('/'); // Nos manda al inicio (donde está el botón de asistencia)
-  };
+    const navigate = useNavigate();
 
-  return (
-    <div style={{ padding: '60px 20px' }}>
-      <div style={{ 
-        maxWidth: '350px', 
-        margin: 'auto', 
-        padding: '30px', 
-        backgroundColor: 'white', 
-        borderRadius: '12px', 
-        boxShadow: '0 8px 24px rgba(0,0,0,0.12)' 
-      }}>
-        <h2 style={{ color: '#2c3e50', marginBottom: '20px' }}>Acceso Docente</h2>
-        <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: '15px', textAlign: 'left' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Correo:</label>
-            <input 
-              type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="ejemplo@colegio.cl" 
-              required
-              style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc', boxSizing: 'border-box' }}
-            />
-          </div>
-          <div style={{ marginBottom: '20px', textAlign: 'left' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Contraseña:</label>
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••" 
-              required
-              style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc', boxSizing: 'border-box' }}
-            />
-          </div>
-          <button 
-            type="submit" 
-            style={{ 
-              width: '100%', 
-              padding: '12px', 
-              backgroundColor: '#2c3e50', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '5px', 
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: 'bold'
-            }}
-          >
-            Entrar al Portal
-          </button>
-        </form>
-      </div>
-    </div>
-  );
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+
+        try {
+            // Llamamos al servicio que creamos en la carpeta services
+            const userData = await login(username, password);
+
+            console.log("Login exitoso:", userData);
+
+            // Guardamos la sesión en el navegador (Local Storage)
+            // Esto nos sirve para mostrar el nombre en el Header después
+            localStorage.setItem('user', JSON.stringify(userData));
+
+            // Redirección lógica según el rol que viene del BFF
+            if (userData.rol === 'profesor') {
+                navigate('/dashboard-profesor');
+            } else if (userData.rol === 'alumno') {
+                navigate('/dashboard-alumno');
+            } else {
+                setError('Rol de usuario no reconocido');
+            }
+
+        } catch (err) {
+            // Si el BFF devuelve 401 o hay error de red
+            setError('Usuario o contraseña incorrectos. Intente de nuevo.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div style={styles.container}>
+            <form onSubmit={handleSubmit} style={styles.form}>
+                <h2>Colegio Bernardo O'Higgins</h2>
+                <h3>Iniciar Sesión</h3>
+                
+                {error && <p style={styles.error}>{error}</p>}
+
+                <div style={styles.inputGroup}>
+                    <label>Usuario (RUT o Apodo):</label>
+                    <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                        placeholder="Ej: william"
+                    />
+                </div>
+
+                <div style={styles.inputGroup}>
+                    <label>Contraseña:</label>
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        placeholder="****"
+                    />
+                </div>
+
+                <button type="submit" disabled={loading} style={styles.button}>
+                    {loading ? 'Cargando...' : 'Entrar'}
+                </button>
+            </form>
+        </div>
+    );
+};
+
+// Estilos rápidos para que no se vea desordenado
+const styles = {
+    container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f4f4f4' },
+    form: { padding: '2rem', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '300px' },
+    inputGroup: { marginBottom: '1rem', display: 'flex', flexDirection: 'column' },
+    error: { color: 'red', fontSize: '0.8rem', marginBottom: '1rem' },
+    button: { width: '100%', padding: '0.7rem', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }
 };
 
 export default LoginPage;

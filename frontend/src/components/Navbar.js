@@ -1,82 +1,72 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
-const Navbar = ({ user, onLogout }) => {
-  const navigate = useNavigate();
+const Navbar = () => {
+    const navigate = useNavigate();
+    
+    // Obtenemos el usuario del localStorage
+    const userJson = localStorage.getItem('user');
+    const user = userJson ? JSON.parse(userJson) : null;
 
-  const handleLogout = () => {
-    onLogout(); // Limpia el usuario en App.js
-    navigate('/'); // Nos manda al login
-  };
+    // Si no hay nadie logueado, no mostramos el Navbar
+    if (!user) {
+        return null;
+    }
 
-  return (
-    <nav style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '0 20px',
-      backgroundColor: '#003366', // Azul Duoc / Institucional
-      color: 'white',
-      height: '60px',
-      boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
-        Colegio Bernardo O'Higgins
-      </div>
+    const handleLogout = () => {
+        localStorage.clear(); // Borramos la sesión
+        navigate('/');        // Volvemos al login
+    };
 
-      <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-        {/* Enlaces visibles para TODOS los que estén logueados */}
-        {user && (
-          <>
-            <Link to="/home" style={{ color: 'white', textDecoration: 'none' }}>Inicio</Link>
-            <Link to="/calificaciones" style={{ color: 'white', textDecoration: 'none' }}>Calificaciones</Link>
-          </>
-        )}
-        
-        {/* Enlace visible SOLO para el PROFESOR */}
-        {user?.role === 'profesor' && (
-          <Link to="/asistencia" style={{ 
-            color: 'white', 
-            textDecoration: 'none', 
-            backgroundColor: '#00509d', 
-            padding: '5px 12px', 
-            borderRadius: '4px',
-            fontWeight: 'bold'
-          }}>
-            Pasar Asistencia
-          </Link>
-        )}
+    return (
+        <nav style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 20px',
+            backgroundColor: '#2c3e50',
+            color: 'white',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+            <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>
+                Colegio Bernardo O'Higgins
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+                
+                {/* ESTE BLOQUE APARECE SOLO SI ES PROFESOR */}
+                {user.rol === 'profesor' && (
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                        <Link to="/asistencia" style={{ color: 'white', textDecoration: 'none', fontSize: '0.9rem' }}>
+                            📋 Registrar Asistencia
+                        </Link>
+                        <Link to="/calificaciones" style={{ color: 'white', textDecoration: 'none', fontSize: '0.9rem' }}>
+                            ⭐ Notas
+                        </Link>
+                    </div>
+                )}
 
-        {/* Bloque de usuario y botón salir */}
-        {user && (
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '15px', 
-            borderLeft: '1px solid rgba(255,255,255,0.3)', 
-            paddingLeft: '15px' 
-          }}>
-            <span style={{ fontSize: '0.9rem' }}>{user.nombre}</span>
-            <button 
-              onClick={handleLogout} 
-              style={{ 
-                backgroundColor: '#d9534f', 
-                color: 'white', 
-                border: 'none', 
-                padding: '5px 10px', 
-                borderRadius: '4px', 
-                cursor: 'pointer',
-                fontSize: '0.8rem'
-              }}
-            >
-              Salir
-            </button>
-          </div>
-        )}
-      </div>
-    </nav>
-  );
+                <div style={{ borderLeft: '1px solid #555', height: '20px' }}></div>
+
+                <span>Bienvenido, <strong>{user.nombre}</strong></span>
+                
+                <button 
+                    onClick={handleLogout}
+                    style={{
+                        backgroundColor: '#e74c3c',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 15px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    Cerrar Sesión
+                </button>
+            </div>
+        </nav>
+    );
 };
 
 export default Navbar;
