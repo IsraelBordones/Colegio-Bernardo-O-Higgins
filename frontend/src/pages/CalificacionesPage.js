@@ -22,73 +22,56 @@ const CalificacionesPage = () => {
         }));
     };
 
-    const agregarNotaNueva = () => {
-        setAlumnos(alumnos.map(al => ({
-            ...al,
-            notas: [...al.notas, 1.0],
-            editando: true
-        })));
+    const agregarNota = () => {
+        setAlumnos(alumnos.map(al => ({ ...al, notas: [...al.notas, 1.0], editando: true })));
     };
 
-    const eliminarUltimaNota = () => {
-        if (alumnos[0].notas.length <= 1) {
-            alert("Debe haber al menos una nota registrada.");
-            return;
-        }
-        if (window.confirm("¿Estás seguro de eliminar la última columna de notas?")) {
-            setAlumnos(alumnos.map(al => ({
-                ...al,
-                notas: al.notas.slice(0, -1) // Quita el último elemento del array
-            })));
+    const eliminarNota = () => {
+        if (alumnos[0].notas.length > 1) {
+            setAlumnos(alumnos.map(al => ({ ...al, notas: al.notas.slice(0, -1) })));
         }
     };
 
     return (
-        <div style={{ padding: '30px' }}>
+        <div className="container-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2>⭐ Panel de Calificaciones</h2>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button onClick={eliminarUltimaNota} style={{ backgroundColor: '#c0392b', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
-                        🗑️ Eliminar Última Nota
-                    </button>
-                    <button onClick={agregarNotaNueva} style={{ backgroundColor: '#27ae60', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
-                        ➕ Agregar Nueva Nota
-                    </button>
+                    <button onClick={eliminarNota} className="btn-danger" style={{ padding: '8px 15px' }}>🗑️ Quitar Nota</button>
+                    <button onClick={agregarNota} className="btn-primary">➕ Agregar Nota</button>
                 </div>
             </div>
             
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px', backgroundColor: 'white' }}>
+            <table className="data-table">
                 <thead>
-                    <tr style={{ backgroundColor: '#2c3e50', color: 'white' }}>
-                        <th style={styles.th}>Alumno</th>
-                        {alumnos[0].notas.map((_, i) => (
-                            <th key={i} style={styles.th}>Nota {i + 1}</th>
-                        ))}
-                        <th style={styles.th}>Promedio</th>
-                        <th style={styles.th}>Acción</th>
+                    <tr>
+                        <th>Alumno</th>
+                        {alumnos[0].notas.map((_, i) => <th key={i}>N{i + 1}</th>)}
+                        <th>Promedio</th>
+                        <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody>
                     {alumnos.map((al) => {
-                        const promedio = al.notas.length > 0 
-                            ? (al.notas.reduce((a, b) => a + b, 0) / al.notas.length).toFixed(1)
-                            : "0.0";
+                        const promedio = (al.notas.reduce((a, b) => a + b, 0) / al.notas.length).toFixed(1);
                         return (
-                            <tr key={al.id} style={{ borderBottom: '1px solid #ddd' }}>
-                                <td style={styles.td}>{al.nombre}</td>
+                            <tr key={al.id}>
+                                <td>{al.nombre}</td>
                                 {al.notas.map((nota, index) => (
-                                    <td key={index} style={styles.td}>
+                                    <td key={index}>
                                         {al.editando ? 
-                                            <input type="number" step="0.1" value={nota} onChange={(e) => handleNotaChange(al.id, index, e.target.value)} style={styles.input} /> 
+                                            <input type="number" step="0.1" value={nota} onChange={(e) => handleNotaChange(al.id, index, e.target.value)} style={{ width: '45px' }} /> 
                                             : nota}
                                     </td>
                                 ))}
-                                <td style={styles.td}>
-                                    <strong style={{ color: promedio >= 4 ? '#27ae60' : '#c0392b' }}>{promedio}</strong>
+                                <td>
+                                    <span className={`badge ${promedio >= 4 ? 'badge-presente' : 'badge-ausente'}`}>
+                                        {promedio}
+                                    </span>
                                 </td>
-                                <td style={styles.td}>
-                                    <button onClick={() => toggleEdit(al.id)} style={{ ...styles.btn, backgroundColor: al.editando ? '#2c3e50' : '#3498db' }}>
-                                        {al.editando ? '💾 Guardar' : '✏️ Editar'}
+                                <td>
+                                    <button onClick={() => toggleEdit(al.id)} className="btn-primary" style={{ padding: '5px 10px', fontSize: '0.8rem' }}>
+                                        {al.editando ? '💾 OK' : '✏️ Editar'}
                                     </button>
                                 </td>
                             </tr>
@@ -98,13 +81,6 @@ const CalificacionesPage = () => {
             </table>
         </div>
     );
-};
-
-const styles = {
-    th: { padding: '15px', textAlign: 'left' },
-    td: { padding: '15px' },
-    input: { width: '50px', padding: '5px', borderRadius: '4px', border: '1px solid #ccc' },
-    btn: { color: 'white', border: 'none', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer' }
 };
 
 export default CalificacionesPage;
