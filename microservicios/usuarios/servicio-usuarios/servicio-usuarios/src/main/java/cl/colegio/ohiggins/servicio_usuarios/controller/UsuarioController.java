@@ -1,4 +1,4 @@
-package cl.colegio.ohiggins.usuarios.controller;
+package cl.colegio.ohiggins.servicio_usuarios.controller;
 
 import cl.colegio.ohiggins.usuarios.model.Usuario;
 import cl.colegio.ohiggins.usuarios.service.UsuarioService;

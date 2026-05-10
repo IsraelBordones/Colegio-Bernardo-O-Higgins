@@ -1,24 +1,47 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import LoginPage from './pages/LoginPage';
+
+// Importamos tus páginas reales
+import AsistenciaPage from './pages/AsistenciaPage';
+import CalificacionesPage from './pages/CalificacionesPage';
+
+// Dashboards simples
+const DashboardProfesor = () => (
+    <div style={{ padding: '40px', textAlign: 'center' }}>
+        <h1>Área del Docente</h1>
+        <p>Selecciona una opción en el menú superior para comenzar.</p>
+    </div>
+);
+
+const DashboardAlumno = () => (
+    <div style={{ padding: '40px', textAlign: 'center' }}>
+        <h1>Área del Estudiante</h1>
+        <p>Aquí podrás revisar tus calificaciones actuales.</p>
+    </div>
+);
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Navbar />
+      
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        
+        {/* Rutas de Dashboard */}
+        <Route path="/dashboard-profesor" element={<DashboardProfesor />} />
+        <Route path="/dashboard-alumno" element={<DashboardAlumno />} />
+        
+        {/* Rutas de Funcionalidades para el Profesor */}
+        <Route path="/asistencia" element={<AsistenciaPage />} />
+        <Route path="/calificaciones" element={<CalificacionesPage />} />
+        
+        {/* Redirección por defecto */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </Router>
   );
 }
 
