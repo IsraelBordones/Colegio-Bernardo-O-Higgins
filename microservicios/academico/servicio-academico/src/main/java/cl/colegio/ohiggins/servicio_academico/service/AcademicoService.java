@@ -1,7 +1,9 @@
-package cl.colegio.ohiggins.academico.service;
+package cl.colegio.ohiggins.servicio_academico.service;
 
-import cl.colegio.ohiggins.academico.model.Academico;
-import cl.colegio.ohiggins.academico.repository.AcademicoRepository;
+import cl.colegio.ohiggins.servicio_academico.model.Academico;
+import cl.colegio.ohiggins.servicio_academico.repository.AcademicoRepository;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -19,3 +21,4 @@ public class AcademicoService {
         return repository.save(nota);
     }
 }
+

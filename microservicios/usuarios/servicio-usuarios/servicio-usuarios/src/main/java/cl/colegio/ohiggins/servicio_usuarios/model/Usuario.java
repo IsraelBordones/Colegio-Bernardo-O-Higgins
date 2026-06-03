@@ -1,21 +1,26 @@
 package cl.colegio.ohiggins.servicio_usuarios.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
-@Document(collection = "usuarios") // Esto crea la "tabla" en Mongo
+@Entity
 public class Usuario {
+
     @Id
-    private String id; // Mongo necesita un ID único tipo String
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String username;
     private String password;
     private String nombre;
     private String role;
-    private Integer cursoId; // Curso asignado (demo/profesor-alumno)
+    private Integer cursoId;
 
     public Usuario() {}
 
-public Usuario(String username, String password, String nombre, String role, Integer cursoId) {
+    public Usuario(String username, String password, String nombre, String role, Integer cursoId) {
         this.username = username;
         this.password = password;
         this.nombre = nombre;
@@ -23,20 +28,52 @@ public Usuario(String username, String password, String nombre, String role, Int
         this.cursoId = cursoId;
     }
 
-    // Getters y Setters
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public String getUsername() {
+        return username;
+    }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    public Integer getCursoId() { return cursoId; }
-    public void setCursoId(Integer cursoId) { this.cursoId = cursoId; }
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public Integer getCursoId() {
+        return cursoId;
+    }
+
+    public void setCursoId(Integer cursoId) {
+        this.cursoId = cursoId;
+    }
 }
 

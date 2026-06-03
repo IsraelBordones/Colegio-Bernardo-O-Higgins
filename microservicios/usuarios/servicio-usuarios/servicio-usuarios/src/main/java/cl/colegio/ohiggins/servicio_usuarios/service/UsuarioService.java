@@ -25,8 +25,8 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    // Método para buscar un usuario específico por su ID de Mongo
-    public Usuario buscarPorId(String id) {
+    // Método para buscar un usuario específico por su ID
+    public Usuario buscarPorId(Long id) {
         return usuarioRepository.findById(id).orElse(null);
     }
 
@@ -34,4 +34,15 @@ public class UsuarioService {
     public List<Usuario> listarAlumnosPorCursoId(int cursoId) {
         return usuarioRepository.findByRoleAndCursoId("alumno", cursoId);
     }
+
+    // Autenticación simple para login del BFF
+    public Usuario autenticar(String username, String password) {
+        if (username == null || password == null) return null;
+
+        return usuarioRepository.findByUsername(username)
+                .filter(u -> password.equals(u.getPassword()))
+                .orElse(null);
+    }
 }
+
+

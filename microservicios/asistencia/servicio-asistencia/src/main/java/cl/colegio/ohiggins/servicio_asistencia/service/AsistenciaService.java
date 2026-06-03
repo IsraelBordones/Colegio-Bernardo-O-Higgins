@@ -1,7 +1,7 @@
-package cl.colegio.ohiggins.asistencia.service;
+package cl.colegio.ohiggins.servicio_asistencia.service;
 
-import cl.colegio.ohiggins.asistencia.model.Asistencia;
-import cl.colegio.ohiggins.asistencia.repository.AsistenciaRepository;
+import cl.colegio.ohiggins.servicio_asistencia.model.Asistencia;
+import cl.colegio.ohiggins.servicio_asistencia.repository.AsistenciaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -19,3 +19,4 @@ public class AsistenciaService {
         return repository.save(asistencia);
     }
 }
+

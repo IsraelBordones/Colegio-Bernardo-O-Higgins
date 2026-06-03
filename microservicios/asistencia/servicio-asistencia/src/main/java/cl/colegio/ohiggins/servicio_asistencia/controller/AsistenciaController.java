@@ -1,7 +1,7 @@
-package cl.colegio.ohiggins.asistencia.controller;
+package cl.colegio.ohiggins.servicio_asistencia.controller;
 
-import cl.colegio.ohiggins.asistencia.model.Asistencia;
-import cl.colegio.ohiggins.asistencia.service.AsistenciaService;
+import cl.colegio.ohiggins.servicio_asistencia.model.Asistencia;
+import cl.colegio.ohiggins.servicio_asistencia.service.AsistenciaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
