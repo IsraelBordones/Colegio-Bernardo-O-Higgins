@@ -1,7 +1,9 @@
-package cl.colegio.ohiggins.academico.controller;
+package cl.colegio.ohiggins.servicio_academico.controller;
 
-import cl.colegio.ohiggins.academico.model.Academico;
-import cl.colegio.ohiggins.academico.service.AcademicoService;
+import cl.colegio.ohiggins.servicio_academico.model.Academico;
+import cl.colegio.ohiggins.servicio_academico.service.AcademicoService;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;

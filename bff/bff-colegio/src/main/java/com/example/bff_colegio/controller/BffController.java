@@ -1,24 +1,57 @@
-package com.example.bff_colegio.controller; // <--- Cambiado a tu ruta real
+package com.example.bff_colegio.controller;
 
 import com.example.bff_colegio.dto.UsuarioDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 
+import java.util.Map;
+
+
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@RequestMapping("/api/colegio")
+@RequestMapping("/api/bff")
 public class BffController {
 
-    @Autowired
-    private WebClient.Builder webClientBuilder;
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
+        String username = loginData.get("username");
+        String password = loginData.get("password");
 
-    @GetMapping("/usuarios")
-    public Flux<UsuarioDTO> obtenerTodosLosUsuarios() {
-        return webClientBuilder.build()
-                .get()
-                .uri("http://localhost:8081/api/usuarios")
-                .retrieve()
-                .bodyToFlux(UsuarioDTO.class);
+        // Autenticación contra usuarios-ms (MySQL)
+        try {
+            // usuarios-ms devuelve: { username, nombre, role }
+            Map<String, String> requestBody = Map.of(
+                    "username", username,
+                    "password", password
+            );
+
+            var userMap = WebClient.builder()
+                    .baseUrl("http://usuarios-ms:8081")
+                    .build()
+                    .post()
+                    .uri("/api/usuarios/login")
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+
+            if (userMap == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
+            }
+
+            UsuarioDTO user = new UsuarioDTO(
+                    (String) userMap.get("username"),
+                    (String) userMap.get("nombre"),
+                    (String) userMap.get("role")
+            );
+
+            return ResponseEntity.ok(user);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
+        }
     }
 }
+

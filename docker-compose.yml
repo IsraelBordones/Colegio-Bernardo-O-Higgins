@@ -1,11 +1,19 @@
 version: '3.8'
 
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb_colegio
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_colegio
     ports:
-      - "27017:27017"
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=colegio
+      - MYSQL_USER=colegio
+      - MYSQL_PASSWORD=colegio
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql_data:/var/lib/mysql
 
   usuarios-ms:
     # Ajustado: entramos a la subcarpeta donde está el Dockerfile
@@ -14,9 +22,12 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - mongodb
+      - mysql
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/db_usuarios
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/colegio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=colegio
+      - SPRING_DATASOURCE_PASSWORD=colegio
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
   academico-ms:
     # Ajustado según tu ruta de find
@@ -25,9 +36,12 @@ services:
     ports:
       - "8082:8082"
     depends_on:
-      - mongodb
+      - mysql
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/db_academico
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/colegio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=colegio
+      - SPRING_DATASOURCE_PASSWORD=colegio
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
   asistencia-ms:
     # Ajustado según tu ruta de find
@@ -36,9 +50,12 @@ services:
     ports:
       - "8083:8083"
     depends_on:
-      - mongodb
+      - mysql
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/db_asistencia
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/colegio?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=colegio
+      - SPRING_DATASOURCE_PASSWORD=colegio
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
   bff:
     # Ajustado: entramos a la subcarpeta bff-colegio
@@ -50,3 +67,7 @@ services:
       - usuarios-ms
       - academico-ms
       - asistencia-ms
+
+volumes:
+  mysql_data:
+    driver: local

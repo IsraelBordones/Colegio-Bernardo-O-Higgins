@@ -1,16 +1,62 @@
-package cl.colegio.ohiggins.academico.model;
+package cl.colegio.ohiggins.servicio_academico.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import lombok.Data;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
-@Data
-@Document(collection = "notas")
+@Entity
 public class Academico {
+
     @Id
-    private String id;
-    private String alumnoId; // Relación lógica con el usuario
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String alumnoId;
     private String asignatura;
     private Double calificacion;
-    private Integer periodo; // 1 o 2 (semestre)
+    private Integer periodo;
+
+    public Academico() {}
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getAlumnoId() {
+        return alumnoId;
+    }
+
+    public void setAlumnoId(String alumnoId) {
+        this.alumnoId = alumnoId;
+    }
+
+    public String getAsignatura() {
+        return asignatura;
+    }
+
+    public void setAsignatura(String asignatura) {
+        this.asignatura = asignatura;
+    }
+
+    public Double getCalificacion() {
+        return calificacion;
+    }
+
+    public void setCalificacion(Double calificacion) {
+        this.calificacion = calificacion;
+    }
+
+    public Integer getPeriodo() {
+        return periodo;
+    }
+
+    public void setPeriodo(Integer periodo) {
+        this.periodo = periodo;
+    }
 }
+

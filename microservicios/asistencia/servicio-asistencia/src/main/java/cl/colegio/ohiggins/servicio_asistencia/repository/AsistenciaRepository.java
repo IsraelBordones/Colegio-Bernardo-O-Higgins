@@ -1,9 +1,14 @@
-package cl.colegio.ohiggins.asistencia.repository;
+package cl.colegio.ohiggins.servicio_asistencia.repository;
 
-import cl.colegio.ohiggins.asistencia.model.Asistencia;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import cl.colegio.ohiggins.servicio_asistencia.model.Asistencia;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
-public interface AsistenciaRepository extends MongoRepository<Asistencia, String> {
+@Repository
+public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
+
     List<Asistencia> findByAlumnoId(String alumnoId);
 }
+

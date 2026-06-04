@@ -1,60 +1,31 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
-import LoginPage from './pages/LoginPage'; 
-import AsistenciaPage from './pages/AsistenciaPage';
-import CalificacionesPage from './pages/CalificacionesPage'; // NUEVA
+import './App.css';
 import Navbar from './components/Navbar';
+import LoginPage from './pages/LoginPage';
+import AsistenciaPage from './pages/AsistenciaPage';
+import CalificacionesPage from './pages/CalificacionesPage';
+import DashboardAlumno from './pages/DashboardAlumno'; // <--- IMPORTAR
+
+const DashboardProfesor = () => (
+    <div className="container-card" style={{ textAlign: 'center' }}>
+        <h1>🍎 Panel del Docente</h1>
+        <p>Utilice el menú superior para gestionar asistencia y calificaciones.</p>
+    </div>
+);
 
 function App() {
-  const [user, setUser] = useState({
-    nombre: 'William Cáceres',
-    role: 'alumno' // Prueba cambiando a 'alumno'
-  });
-
-  const logout = () => {
-    setUser(null);
-  };
-
   return (
     <Router>
-      <Navbar user={user} onLogout={logout} />
-
-      <div style={{ marginTop: '20px' }}>
-        <Routes>
-          <Route path="/" element={<LoginPage setUser={setUser} />} />
-
-          {/* RUTA ASISTENCIA: Solo Profesores */}
-          <Route 
-            path="/asistencia" 
-            element={
-              user?.role === 'profesor' ? <AsistenciaPage /> : <Navigate to="/home" />
-            } 
-          />
-
-          {/* RUTA CALIFICACIONES: Todos los logueados */}
-          <Route 
-            path="/calificaciones" 
-            element={
-              user ? <CalificacionesPage user={user} /> : <Navigate to="/" />
-            } 
-          />
-
-          <Route 
-            path="/home" 
-            element={
-              user ? (
-                <div style={{ textAlign: 'center', marginTop: '50px' }}>
-                  <h1>Bienvenido, {user.nombre}</h1>
-                  <p>Panel de control del {user.role}</p>
-                </div>
-              ) : <Navigate to="/" />
-            } 
-          />
-
-          <Route path="*" element={<Navigate to={user ? "/home" : "/"} />} />
-        </Routes>
-      </div>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/dashboard-profesor" element={<DashboardProfesor />} />
+        <Route path="/dashboard-alumno" element={<DashboardAlumno />} /> {/* <--- USAR COMPONENTE */}
+        <Route path="/asistencia" element={<AsistenciaPage />} />
+        <Route path="/calificaciones" element={<CalificacionesPage />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </Router>
   );
 }

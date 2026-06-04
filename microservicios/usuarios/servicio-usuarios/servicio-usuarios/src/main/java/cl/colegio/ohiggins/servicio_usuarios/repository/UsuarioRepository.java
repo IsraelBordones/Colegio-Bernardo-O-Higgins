@@ -1,11 +1,18 @@
-package cl.colegio.ohiggins.usuarios.repository;
+package cl.colegio.ohiggins.servicio_usuarios.repository;
 
-import cl.colegio.ohiggins.usuarios.model.Usuario;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import cl.colegio.ohiggins.servicio_usuarios.model.Usuario;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
+
 @Repository
-public interface UsuarioRepository extends MongoRepository<Usuario, String> {
-    // Al extender MongoRepository, ya tienes métodos como:
-    // .save(), .findAll(), .delete(), .findById()
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+
+    Optional<Usuario> findByUsername(String username);
+
+    List<Usuario> findByRoleAndCursoId(String role, Integer cursoId);
 }
+

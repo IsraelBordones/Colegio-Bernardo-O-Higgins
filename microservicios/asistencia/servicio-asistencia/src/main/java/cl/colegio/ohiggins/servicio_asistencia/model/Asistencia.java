@@ -1,16 +1,63 @@
-package cl.colegio.ohiggins.asistencia.model;
+package cl.colegio.ohiggins.servicio_asistencia.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import lombok.Data;
+import jakarta.persistence.Entity;
 
-@Data
-@Document(collection = "asistencias")
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Asistencia {
+
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String alumnoId;
-    private String fecha; // Formato YYYY-MM-DD
+    private String fecha; // YYYY-MM-DD
     private boolean presente;
     private String observaciones;
+
+    public Asistencia() {}
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getAlumnoId() {
+        return alumnoId;
+    }
+
+    public void setAlumnoId(String alumnoId) {
+        this.alumnoId = alumnoId;
+    }
+
+    public String getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(String fecha) {
+        this.fecha = fecha;
+    }
+
+    public boolean isPresente() {
+        return presente;
+    }
+
+    public void setPresente(boolean presente) {
+        this.presente = presente;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
+    }
 }
+

@@ -1,82 +1,43 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
-const Navbar = ({ user, onLogout }) => {
-  const navigate = useNavigate();
+const Navbar = () => {
+    const navigate = useNavigate();
+    const userJson = localStorage.getItem('user');
+    const user = userJson ? JSON.parse(userJson) : null;
 
-  const handleLogout = () => {
-    onLogout(); // Limpia el usuario en App.js
-    navigate('/'); // Nos manda al login
-  };
+    if (!user) return null;
 
-  return (
-    <nav style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '0 20px',
-      backgroundColor: '#003366', // Azul Duoc / Institucional
-      color: 'white',
-      height: '60px',
-      boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
-        Colegio Bernardo O'Higgins
-      </div>
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/');
+    };
 
-      <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-        {/* Enlaces visibles para TODOS los que estén logueados */}
-        {user && (
-          <>
-            <Link to="/home" style={{ color: 'white', textDecoration: 'none' }}>Inicio</Link>
-            <Link to="/calificaciones" style={{ color: 'white', textDecoration: 'none' }}>Calificaciones</Link>
-          </>
-        )}
-        
-        {/* Enlace visible SOLO para el PROFESOR */}
-        {user?.role === 'profesor' && (
-          <Link to="/asistencia" style={{ 
-            color: 'white', 
-            textDecoration: 'none', 
-            backgroundColor: '#00509d', 
-            padding: '5px 12px', 
-            borderRadius: '4px',
-            fontWeight: 'bold'
-          }}>
-            Pasar Asistencia
-          </Link>
-        )}
+    return (
+        <nav className="navbar-custom">
+            <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>
+                Colegio Bernardo O'Higgins
+            </div>
+            
+            <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                {user.rol === 'profesor' && (
+                    <>
+                        <Link title="Dashboard" to="/dashboard-profesor">🏠 Inicio</Link>
+                        <Link to="/asistencia">📋 Asistencia</Link>
+                        <Link to="/calificaciones">⭐ Notas</Link>
+                    </>
+                )}
 
-        {/* Bloque de usuario y botón salir */}
-        {user && (
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '15px', 
-            borderLeft: '1px solid rgba(255,255,255,0.3)', 
-            paddingLeft: '15px' 
-          }}>
-            <span style={{ fontSize: '0.9rem' }}>{user.nombre}</span>
-            <button 
-              onClick={handleLogout} 
-              style={{ 
-                backgroundColor: '#d9534f', 
-                color: 'white', 
-                border: 'none', 
-                padding: '5px 10px', 
-                borderRadius: '4px', 
-                cursor: 'pointer',
-                fontSize: '0.8rem'
-              }}
-            >
-              Salir
-            </button>
-          </div>
-        )}
-      </div>
-    </nav>
-  );
+                <span style={{ borderLeft: '1px solid rgba(255,255,255,0.3)', paddingLeft: '20px' }}>
+                    Hola, <strong>{user.nombre}</strong>
+                </span>
+                
+                <button onClick={handleLogout} className="btn-danger">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </nav>
+    );
 };
 
 export default Navbar;
