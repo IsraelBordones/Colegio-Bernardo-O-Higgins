@@ -5,7 +5,10 @@ import Navbar from './components/Navbar';
 import LoginPage from './pages/LoginPage';
 import AsistenciaPage from './pages/AsistenciaPage';
 import CalificacionesPage from './pages/CalificacionesPage';
-import DashboardAlumno from './pages/DashboardAlumno'; // <--- IMPORTAR
+import DashboardAlumno from './pages/DashboardAlumno'; // legado
+import LibroClaseAlumno from './pages/LibroClaseAlumno';
+import LibroClaseProfesor from './pages/LibroClaseProfesor';
+
 
 const DashboardProfesor = () => (
     <div className="container-card" style={{ textAlign: 'center' }}>
@@ -20,10 +23,14 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/dashboard-profesor" element={<DashboardProfesor />} />
-        <Route path="/dashboard-alumno" element={<DashboardAlumno />} /> {/* <--- USAR COMPONENTE */}
+        <Route path="/dashboard-profesor" element={<LibroClaseProfesor />} />
+        <Route path="/dashboard-alumno" element={<LibroClaseAlumno />} /> {/* reemplazado por libro de clases */}
+
         <Route path="/asistencia" element={<AsistenciaPage />} />
         <Route path="/calificaciones" element={<CalificacionesPage />} />
+        <Route path="/libro-alumno" element={<LibroClaseAlumno />} />
+        <Route path="/libro-profesor" element={<LibroClaseProfesor />} />
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

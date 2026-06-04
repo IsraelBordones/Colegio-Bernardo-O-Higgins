@@ -43,6 +43,7 @@ body {
 }
 
 /* Contenedores tipo Card */
+/* container-card definido en portal.css, pero mantenemos compatibilidad */
 .container-card {
   background: var(--white);
   padding: 2rem;

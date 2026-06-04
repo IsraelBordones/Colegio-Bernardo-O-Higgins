@@ -20,13 +20,18 @@ const Navbar = () => {
             </div>
             
             <div className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                {user.rol === 'alumno' && (
+                    <Link title="Libro de clases" to="/dashboard-alumno">📚 Mi libro</Link>
+                )}
                 {user.rol === 'profesor' && (
+
                     <>
-                        <Link title="Dashboard" to="/dashboard-profesor">🏠 Inicio</Link>
+                        <Link title="Libro de clases" to="/dashboard-profesor">📚 Libro</Link>
                         <Link to="/asistencia">📋 Asistencia</Link>
                         <Link to="/calificaciones">⭐ Notas</Link>
                     </>
                 )}
+
 
                 <span style={{ borderLeft: '1px solid rgba(255,255,255,0.3)', paddingLeft: '20px' }}>
                     Hola, <strong>{user.nombre}</strong>
