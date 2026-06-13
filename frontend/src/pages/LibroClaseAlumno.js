@@ -3,19 +3,24 @@ import { obtenerCalificacionesPorAlumno } from '../services/calificacionesServic
 import { obtenerHistorialAsistenciaPorAlumno } from '../services/asistenciaService';
 
 const LibroClaseAlumno = () => {
-  const userJson = localStorage.getItem('user');
-  const user = userJson ? JSON.parse(userJson) : null;
+  // ✅ useMemo estabiliza el objeto user: solo se parsea una vez,
+  //    no en cada render, evitando el bucle infinito del useEffect.
+  const user = useMemo(() => {
+    const userJson = localStorage.getItem('user');
+    return userJson ? JSON.parse(userJson) : null;
+  }, []);
 
   const alumnoId = useMemo(() => user?.username || user?.id || '', [user]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
   const [calificaciones, setCalificaciones] = useState([]);
   const [asistencias, setAsistencias] = useState([]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!alumnoId) return;
+
+    let cancelled = false; // evita actualizar estado si el componente se desmonta
 
     const run = async () => {
       try {
@@ -23,22 +28,24 @@ const LibroClaseAlumno = () => {
         setError('');
         const [cal, asis] = await Promise.all([
           obtenerCalificacionesPorAlumno(alumnoId),
-          obtenerHistorialAsistenciaPorAlumno(alumnoId),
+          obtenerHistorialAsistenciaPorAlumno(alumnoId).catch(() => []), // asistencia puede fallar sin romper todo
         ]);
-        setCalificaciones(cal);
-        setAsistencias(asis);
+        if (!cancelled) {
+          setCalificaciones(cal);
+          setAsistencias(asis);
+        }
       } catch (e) {
-        setError(e?.message || 'Error cargando datos');
+        if (!cancelled) setError(e?.message || 'Error cargando datos');
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     run();
-  }, [user, alumnoId]);
+    return () => { cancelled = true; };
+  }, [alumnoId]); // ✅ solo depende de alumnoId (string estable), no del objeto user
 
   const resumen = useMemo(() => {
-    // Agrupar notas por asignatura
     const porAsignatura = {};
     for (const item of calificaciones || []) {
       const asignatura = item.asignatura || 'Sin asignatura';
@@ -47,11 +54,12 @@ const LibroClaseAlumno = () => {
     }
 
     const calByAsignatura = Object.entries(porAsignatura).map(([asignatura, notas]) => {
-      const promedio = notas.length ? (notas.reduce((a, b) => a + (b || 0), 0) / notas.length).toFixed(1) : '0.0';
+      const promedio = notas.length
+        ? (notas.reduce((a, b) => a + (b || 0), 0) / notas.length).toFixed(1)
+        : '0.0';
       return { asignatura, notas, promedio: Number(promedio) };
     });
 
-    // Asistencia porcentual basada en los registros
     const total = (asistencias || []).length;
     const presentes = (asistencias || []).filter(a => a.presente === true).length;
     const asistenciaTotal = total ? Math.round((presentes / total) * 100) : 0;
@@ -92,7 +100,9 @@ const LibroClaseAlumno = () => {
             </div>
             <div style={styles.statBox}>
               <span style={styles.statLabel}>Situación Final</span>
-              <span className={`badge ${resumen.promovido ? 'badge-presente' : 'badge-ausente'}`}>{resumen.promovido ? 'Promovido' : 'En proceso'}</span>
+              <span className={`badge ${resumen.promovido ? 'badge-presente' : 'badge-ausente'}`}>
+                {resumen.promovido ? 'Promovido' : 'En proceso'}
+              </span>
             </div>
           </div>
 
@@ -111,7 +121,6 @@ const LibroClaseAlumno = () => {
                   <td colSpan={3} style={{ textAlign: 'center' }}>Sin datos</td>
                 </tr>
               )}
-
               {resumen.calByAsignatura.map(r => (
                 <tr key={r.asignatura}>
                   <td style={{ fontWeight: 500 }}>{r.asignatura}</td>
@@ -144,4 +153,3 @@ const styles = {
 };
 
 export default LibroClaseAlumno;
-

@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { obtenerHistorialAsistenciaPorAlumno, registrarAsistencia } from '../services/asistenciaService';
+import { registrarAsistencia } from '../services/asistenciaService';
 import { guardarCalificacion } from '../services/calificacionesService';
 import { obtenerAlumnosPorCurso } from '../services/usuariosService';
 
 const LibroClaseProfesor = () => {
-  const userJson = localStorage.getItem('user');
-  const user = userJson ? JSON.parse(userJson) : null;
+  // ✅ useMemo estabiliza el objeto user para evitar bucle infinito
+  const user = useMemo(() => {
+    const userJson = localStorage.getItem('user');
+    return userJson ? JSON.parse(userJson) : null;
+  }, []);
 
   const [cursoId, setCursoId] = useState(1);
   const [asignatura, setAsignatura] = useState('Matemáticas');
@@ -16,27 +19,27 @@ const LibroClaseProfesor = () => {
   const [mensaje, setMensaje] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [nota, setNota] = useState(4.0);
+  const [periodo, setPeriodo] = useState(1);
+
   useEffect(() => {
     if (!user) return;
+
+    let cancelled = false;
 
     const run = async () => {
       try {
         setError('');
         const data = await obtenerAlumnosPorCurso(cursoId);
-        setAlumnos(data);
+        if (!cancelled) setAlumnos(data);
       } catch (e) {
-        setError(e?.message || 'Error cargando alumnos');
+        if (!cancelled) setError(e?.message || 'Error cargando alumnos');
       }
     };
 
     run();
-  }, [cursoId, user]);
-
-  const presentePorAlumno = useMemo(() => {
-    // No guardamos estado local por persistencia real en backend (simple demo)
-    // Si deseas, se puede extender a listar por fecha/asignatura.
-    return {};
-  }, []);
+    return () => { cancelled = true; };
+  }, [cursoId]); // ✅ solo depende de cursoId, no del objeto user
 
   const marcar = async (alumno, estado) => {
     try {
@@ -59,9 +62,6 @@ const LibroClaseProfesor = () => {
       setLoading(false);
     }
   };
-
-  const [nota, setNota] = useState(4.0);
-  const [periodo, setPeriodo] = useState(1);
 
   const guardarNotaParaAlumno = async (alumno) => {
     try {
@@ -131,7 +131,6 @@ const LibroClaseProfesor = () => {
               <td colSpan={4} style={{ textAlign: 'center' }}>Sin alumnos para este curso</td>
             </tr>
           )}
-
           {alumnos.map((al) => (
             <tr key={al.id}>
               <td>{al.nombre}</td>
@@ -170,4 +169,3 @@ const LibroClaseProfesor = () => {
 };
 
 export default LibroClaseProfesor;
-
