@@ -17,16 +17,16 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.POST, "/api/usuarios/login").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/usuarios/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/usuarios/**").permitAll()
                 .anyRequest().permitAll()
             )
             // Deshabilita cualquier tipo de login/form para que no interfiera
             .formLogin(form -> form.disable())
-            .httpBasic(Customizer.withDefaults());
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .logout(logout -> logout.disable());
 
         return http.build();
+
+
     }
 }
 

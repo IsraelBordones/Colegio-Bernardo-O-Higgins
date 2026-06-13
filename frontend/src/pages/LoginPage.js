@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService'; // El servicio que creamos antes
 
+
+
+
+
 const LoginPage = () => {
     // Estados para capturar lo que el usuario escribe
     const [username, setUsername] = useState('');
@@ -17,23 +21,29 @@ const LoginPage = () => {
         setLoading(true);
 
         try {
-            // Llamamos al servicio que creamos en la carpeta services
+            // Solo intentar login (sin chequeo previo)
             const userData = await login(username, password);
 
+
             console.log("Login exitoso:", userData);
+
 
             // Guardamos la sesión en el navegador (Local Storage)
             // Esto nos sirve para mostrar el nombre en el Header después
             localStorage.setItem('user', JSON.stringify(userData));
 
-            // Redirección lógica según el rol que viene del BFF
-            if (userData.rol === 'profesor') {
+            // Redirección lógica según el rol
+            if (userData?.rol === 'profesor') {
                 navigate('/dashboard-profesor');
-            } else if (userData.rol === 'alumno') {
+            } else if (typeof userData?.rol === 'string' && userData.rol.startsWith('alumno')) {
+                navigate('/dashboard-alumno');
+            } else if (userData?.rol === 'alumno') {
                 navigate('/dashboard-alumno');
             } else {
                 setError('Rol de usuario no reconocido');
             }
+
+
 
         } catch (err) {
             // Si el BFF devuelve 401 o hay error de red

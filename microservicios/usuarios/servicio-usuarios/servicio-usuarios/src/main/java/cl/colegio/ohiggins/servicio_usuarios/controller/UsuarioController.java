@@ -32,23 +32,33 @@ public class UsuarioController {
     }
 
     // Login: POST /api/usuarios/login { username, password }
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
-        String username = loginData.get("username");
-        String password = loginData.get("password");
+    @PostMapping(value = "/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, Object> loginData) {
+        try {
+            String username = loginData == null || loginData.get("username") == null ? null : String.valueOf(loginData.get("username"));
+            String password = loginData == null || loginData.get("password") == null ? null : String.valueOf(loginData.get("password"));
 
-        Usuario user = usuarioService.autenticar(username, password);
-        if (user == null) {
+            if (username == null || password == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
+            }
+
+            Usuario user = usuarioService.autenticar(username, password);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "username", user.getUsername(),
+                    "nombre", user.getNombre(),
+                    "role", user.getRole()
+            ));
+        } catch (Exception e) {
+            // Evita que el servidor muera por errores de deserialización/parseo
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
         }
-
-        // No devolver password
-        return ResponseEntity.ok(Map.of(
-                "username", user.getUsername(),
-                "nombre", user.getNombre(),
-                "role", user.getRole()
-        ));
     }
+
+
 
     // Cuando alguien haga un POST a /api/usuarios con un JSON de usuario
     @PostMapping

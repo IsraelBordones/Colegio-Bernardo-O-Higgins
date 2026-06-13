@@ -12,10 +12,18 @@ import java.util.Map;
 
 
 
-@CrossOrigin(origins = "http://localhost:3000")
+
+
+@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS}, allowCredentials = "true")
 @RestController
 @RequestMapping("/api/bff")
 public class BffController {
+
+    public static class LoginRequest {
+        public String username;
+        public String password;
+    }
+
 
     @Autowired
     private WebClient.Builder webClientBuilder;
@@ -25,9 +33,11 @@ public class BffController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
-        String username = loginData.get("username");
-        String password = loginData.get("password");
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginData) {
+        String username = loginData.username;
+        String password = loginData.password;
+
+
 
         // Autenticación contra usuarios-ms (MySQL)
         try {
@@ -37,6 +47,7 @@ public class BffController {
                     "password", password
             );
 
+            // usar tipo parametrizado para que WebClient no falle al deserializar
             var userMap = webClientBuilder
                     .baseUrl("http://usuarios-ms:8081")
                     .build()
@@ -44,33 +55,52 @@ public class BffController {
                     .uri("/api/usuarios/login")
                     .bodyValue(requestBody)
                     .retrieve()
-                    .bodyToMono(Map.class)
+                    .bodyToMono(new org.springframework.core.ParameterizedTypeReference<Map<String, String>>() {})
                     .block();
 
-
-            if (userMap == null) {
+            if (userMap == null || !userMap.containsKey("username")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
             }
 
-            UsuarioDTO user = new UsuarioDTO(
-                    (String) userMap.get("username"),
-                    (String) userMap.get("nombre"),
-                    (String) userMap.get("role")
-            );
-
-            return ResponseEntity.ok(user);
+            // usuarios-ms devuelve la propiedad "role", así que mapeamos role -> rol
+            return ResponseEntity.ok(new UsuarioDTO(
+                    userMap.get("username"),
+                    userMap.get("nombre"),
+                    userMap.get("role")
+            ));
 
         } catch (Exception e) {
+            // incluir detalle mínimo en consola para depurar
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas");
         }
-
-
     }
+
+
 
     // ======================
     // Usuarios
 
     // ======================
+    @GetMapping("/usuarios")
+    public ResponseEntity<List<Map>> listarUsuarios() {
+        try {
+            List<Map> usuarios = webClientBuilder
+                    .baseUrl("http://usuarios-ms:8081")
+                    .build()
+                    .get()
+                    .uri("/api/usuarios")
+                    .retrieve()
+                    .bodyToMono(List.class)
+                    .block();
+
+            return ResponseEntity.ok(usuarios);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(List.of(Map.of("error", e.getClass().getSimpleName(), "message", String.valueOf(e.getMessage()))));
+        }
+    }
+
     @GetMapping("/usuarios/alumnos")
     public ResponseEntity<List<Map>> listarAlumnosPorCurso(@RequestParam int cursoId) {
         try {
