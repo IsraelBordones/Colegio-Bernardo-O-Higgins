@@ -1,40 +1,37 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import './App.css';
-import Navbar from './components/Navbar';
-import LoginPage from './pages/LoginPage';
-import AsistenciaPage from './pages/AsistenciaPage';
-import CalificacionesPage from './pages/CalificacionesPage';
-import DashboardAlumno from './pages/DashboardAlumno'; // legado
-import LibroClaseAlumno from './pages/LibroClaseAlumno';
-import LibroClaseProfesor from './pages/LibroClaseProfesor';
-
-
-const DashboardProfesor = () => (
-    <div className="container-card" style={{ textAlign: 'center' }}>
-        <h1>🍎 Panel del Docente</h1>
-        <p>Utilice el menú superior para gestionar asistencia y calificaciones.</p>
-    </div>
-);
+import React, { useState } from 'react';
+import Login from './pages/Login';
+import DashboardAlumno from './pages/DashboardAlumno';
+import DashboardProfesor from './pages/DashboardProfesor';
 
 function App() {
-  return (
-    <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/dashboard-profesor" element={<LibroClaseProfesor />} />
-        <Route path="/dashboard-alumno" element={<LibroClaseAlumno />} /> {/* reemplazado por libro de clases */}
+  const [usuario, setUsuario] = useState(() => {
+    // Recuperar sesión del sessionStorage al recargar
+    const stored = sessionStorage.getItem('usuario');
+    return stored ? JSON.parse(stored) : null;
+  });
 
-        <Route path="/asistencia" element={<AsistenciaPage />} />
-        <Route path="/calificaciones" element={<CalificacionesPage />} />
-        <Route path="/libro-alumno" element={<LibroClaseAlumno />} />
-        <Route path="/libro-profesor" element={<LibroClaseProfesor />} />
+  const handleLogin = (userData) => {
+    sessionStorage.setItem('usuario', JSON.stringify(userData));
+    setUsuario(userData);
+  };
 
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </Router>
-  );
+  const handleLogout = () => {
+    sessionStorage.removeItem('usuario');
+    setUsuario(null);
+  };
+
+  if (!usuario) {
+    return <Login onLogin={handleLogin} />;
+  }
+
+  const rol = (usuario.rol || usuario.role || '').toUpperCase();
+
+  if (rol === 'PROFESOR' || rol === 'TEACHER') {
+    return <DashboardProfesor usuario={usuario} onLogout={handleLogout} />;
+  }
+
+  // Por defecto: vista alumno
+  return <DashboardAlumno usuario={usuario} onLogout={handleLogout} />;
 }
 
 export default App;

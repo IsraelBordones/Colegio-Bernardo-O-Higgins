@@ -16,6 +16,7 @@ public class Academico {
     private String asignatura;
     private Double calificacion;
     private Integer periodo;
+    private String tipo;
 
     public Academico() {}
 
@@ -55,6 +56,8 @@ public class Academico {
         return periodo;
     }
 
+    public String getTipo() { return tipo; }
+    public void setTipo(String tipo) { this.tipo = tipo; }
     public void setPeriodo(Integer periodo) {
         this.periodo = periodo;
     }

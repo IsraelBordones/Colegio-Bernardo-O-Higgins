@@ -17,6 +17,7 @@ public class Asistencia {
     private String fecha; // YYYY-MM-DD
     private boolean presente;
     private String observaciones;
+    private String asignatura;
 
     public Asistencia() {}
 
@@ -52,6 +53,8 @@ public class Asistencia {
         this.presente = presente;
     }
 
+    public String getAsignatura() { return asignatura; }
+    public void setAsignatura(String asignatura) { this.asignatura = asignatura; }
     public String getObservaciones() {
         return observaciones;
     }

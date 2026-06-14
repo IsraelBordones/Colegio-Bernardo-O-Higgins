@@ -1,91 +1,156 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { listarNotas, historialAsistencia } from '../services/api';
+import './Dashboard.css';
 
-const DashboardAlumno = () => {
-    const userJson = localStorage.getItem('user');
-    const user = userJson ? JSON.parse(userJson) : null;
+function DashboardAlumno({ usuario, onLogout }) {
+  const [notas, setNotas] = useState([]);
+  const [asistencia, setAsistencia] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('notas');
 
-    // Datos simulados del progreso del alumno
-    const misAsignaturas = [
-        { id: 1, nombre: "Matemáticas", notas: [5.5, 6.2, 5.8], asistencia: 95 },
-        { id: 2, nombre: "Lenguaje y Comunicación", notas: [6.0, 7.0], asistencia: 100 },
-        { id: 3, nombre: "Historia y Geografía", notas: [4.5, 3.8, 5.0], asistencia: 85 },
-        { id: 4, nombre: "Ciencias Naturales", notas: [5.2], asistencia: 92 },
-    ];
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        const [notasData, asistenciaData] = await Promise.all([
+          listarNotas(usuario.username),
+          historialAsistencia(usuario.username),
+        ]);
+        setNotas(notasData || []);
+        setAsistencia(asistenciaData || []);
+      } catch (e) {
+        console.error('Error cargando datos:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    cargarDatos();
+  }, [usuario.username]);
 
-    if (!user) return <div className="container-card">Cargando...</div>;
+  const promedio = notas.length
+    ? (notas.reduce((acc, n) => acc + (parseFloat(n.calificacion) || 0), 0) / notas.length).toFixed(1)
+    : '-';
 
-    return (
-        <div className="container-card">
-            <div style={{ borderBottom: '2px solid #eee', marginBottom: '30px', paddingBottom: '10px' }}>
-                <h1>🎓 Mi Portal Académico</h1>
-                <p>Bienvenido, <strong>{user.nombre}</strong> | RUN: 12.345.678-9</p>
+  const presentes = asistencia.filter(a => a.presente || a.estado === 'PRESENTE').length;
+  const pctAsistencia = asistencia.length
+    ? Math.round((presentes / asistencia.length) * 100)
+    : 0;
+
+  return (
+    <div className="dashboard-container">
+      <header className="dashboard-header">
+        <div className="header-brand">
+          <h1>Colegio Bernardo O'Higgins</h1>
+        </div>
+        <div className="header-user">
+          <span>Bienvenido/a, <strong>{usuario.nombre || usuario.username}</strong></span>
+          <span className="badge badge-alumno">Alumno</span>
+          <button className="btn-logout" onClick={onLogout}>Cerrar sesión</button>
+        </div>
+      </header>
+
+      <main className="dashboard-main">
+        <div className="stats-row">
+          <div className="stat-card">
+            <div className="stat-value">{promedio}</div>
+            <div className="stat-label">Promedio General</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-value">{notas.length}</div>
+            <div className="stat-label">Evaluaciones</div>
+          </div>
+          <div className="stat-card">
+            <div className={`stat-value ${pctAsistencia < 75 ? 'text-danger' : 'text-success'}`}>
+              {pctAsistencia}%
             </div>
+            <div className="stat-label">Asistencia</div>
+          </div>
+        </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '30px' }}>
-                <div style={styles.statBox}>
-                    <span style={styles.statLabel}>Promedio General</span>
-                    <span style={styles.statValue}>5.7</span>
-                </div>
-                <div style={styles.statBox}>
-                    <span style={styles.statLabel}>Asistencia Total</span>
-                    <span style={styles.statValue}>93%</span>
-                </div>
-                <div style={styles.statBox}>
-                    <span style={styles.statLabel}>Situación Final</span>
-                    <span className="badge badge-presente">Promovido</span>
-                </div>
-            </div>
+        <div className="tabs">
+          <button
+            className={`tab-btn ${activeTab === 'notas' ? 'active' : ''}`}
+            onClick={() => setActiveTab('notas')}
+          >
+            Mis Notas
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'asistencia' ? 'active' : ''}`}
+            onClick={() => setActiveTab('asistencia')}
+          >
+            Mi Asistencia
+          </button>
+        </div>
 
-            <h3>📊 Resumen de Asignaturas</h3>
-            <table className="data-table">
+        {loading ? (
+          <div className="loading">Cargando datos...</div>
+        ) : activeTab === 'notas' ? (
+          <div className="table-wrapper">
+            {notas.length === 0 ? (
+              <p className="empty-msg">No hay notas registradas aún.</p>
+            ) : (
+              <table className="data-table">
                 <thead>
-                    <tr>
-                        <th>Asignatura</th>
-                        <th>Calificaciones</th>
-                        <th style={{ textAlign: 'center' }}>Asistencia</th>
-                        <th style={{ textAlign: 'center' }}>Promedio</th>
-                    </tr>
+                  <tr>
+                    <th>#</th>
+                    <th>Asignatura</th>
+                    <th>Tipo</th>
+                    <th>Nota</th>
+                    <th>Período</th>
+                  </tr>
                 </thead>
                 <tbody>
-                    {misAsignaturas.map((ramo) => {
-                        const suma = ramo.notas.reduce((a, b) => a + b, 0);
-                        const promedio = (suma / ramo.notas.length).toFixed(1);
-                        
-                        return (
-                            <tr key={ramo.id}>
-                                <td style={{ fontWeight: '500' }}>{ramo.nombre}</td>
-                                <td>{ramo.notas.join(' - ')}</td>
-                                <td style={{ textAlign: 'center' }}>
-                                    <span className={`badge ${ramo.asistencia >= 85 ? 'badge-presente' : 'badge-ausente'}`}>
-                                        {ramo.asistencia}%
-                                    </span>
-                                </td>
-                                <td style={{ textAlign: 'center' }}>
-                                    <strong style={{ color: promedio >= 4 ? '#27ae60' : '#e74c3c' }}>
-                                        {promedio}
-                                    </strong>
-                                </td>
-                            </tr>
-                        );
-                    })}
+                  {notas.map((n, i) => (
+                    <tr key={n.id || i}>
+                      <td>{i + 1}</td>
+                      <td>{n.asignatura || n.materia || '-'}</td>
+                      <td>{n.tipo || '-'}</td>
+                      <td>
+                        <span className={`nota-badge ${parseFloat(n.calificacion) >= 4.0 ? 'aprobado' : 'reprobado'}`}>
+                          {n.calificacion}
+                        </span>
+                      </td>
+                      <td>{n.periodo ? `Período ${n.periodo}` : '-'}</td>
+                    </tr>
+                  ))}
                 </tbody>
-            </table>
-        </div>
-    );
-};
-
-const styles = {
-    statBox: {
-        background: '#f8f9fa',
-        padding: '20px',
-        borderRadius: '10px',
-        textAlign: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        boxShadow: 'inset 0 0 10px rgba(0,0,0,0.02)'
-    },
-    statLabel: { fontSize: '0.9rem', color: '#666', marginBottom: '5px' },
-    statValue: { fontSize: '1.8rem', fontWeight: 'bold', color: '#2c3e50' }
-};
+              </table>
+            )}
+          </div>
+        ) : (
+          <div className="table-wrapper">
+            {asistencia.length === 0 ? (
+              <p className="empty-msg">No hay registros de asistencia aún.</p>
+            ) : (
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Fecha</th>
+                    <th>Asignatura</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {asistencia.map((a, i) => (
+                    <tr key={a.id || i}>
+                      <td>{i + 1}</td>
+                      <td>{a.fecha ? new Date(a.fecha).toLocaleDateString('es-CL') : '-'}</td>
+                      <td>{a.asignatura || '-'}</td>
+                      <td>
+                        <span className={`asistencia-badge ${(a.presente || a.estado === 'PRESENTE') ? 'presente' : 'ausente'}`}>
+                          {(a.presente || a.estado === 'PRESENTE') ? 'Presente' : 'Ausente'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
 
 export default DashboardAlumno;
