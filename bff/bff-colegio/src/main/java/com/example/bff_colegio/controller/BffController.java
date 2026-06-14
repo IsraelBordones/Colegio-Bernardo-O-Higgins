@@ -49,7 +49,7 @@ public class BffController {
 
             // usar tipo parametrizado para que WebClient no falle al deserializar
             var userMap = webClientBuilder
-                    .baseUrl("http://localhost:8081")
+                    .baseUrl("http://usuarios-ms:8081")
                     .build()
                     .post()
                     .uri("/api/usuarios/login")
@@ -86,7 +86,7 @@ public class BffController {
     public ResponseEntity<List<Map>> listarUsuarios() {
         try {
             List<Map> usuarios = webClientBuilder
-                    .baseUrl("http://localhost:8081")
+                    .baseUrl("http://usuarios-ms:8081")
                     .build()
                     .get()
                     .uri("/api/usuarios")
@@ -105,7 +105,7 @@ public class BffController {
     public ResponseEntity<List<Map>> listarAlumnosPorCurso(@RequestParam int cursoId) {
         try {
             List<Map> alumnos = webClientBuilder
-                    .baseUrl("http://localhost:8081")
+                    .baseUrl("http://usuarios-ms:8081")
                     .build()
                     .get()
                     .uri(uriBuilder -> uriBuilder
@@ -129,7 +129,7 @@ public class BffController {
     public ResponseEntity<?> registrarAsistencia(@RequestBody Map<String, Object> asistencia) {
         try {
             var saved = webClientBuilder
-                    .baseUrl("http://localhost:8083")
+                    .baseUrl("http://asistencia-ms:8083")
                     .build()
                     .post()
                     .uri("/api/asistencia")
@@ -149,7 +149,7 @@ public class BffController {
     public ResponseEntity<List<Map>> historialAsistencia(@PathVariable String alumnoId) {
         try {
             List<Map> historial = webClientBuilder
-                    .baseUrl("http://localhost:8083")
+                    .baseUrl("http://asistencia-ms:8083")
                     .build()
                     .get()
                     .uri("/api/asistencia/alumno/" + alumnoId)
@@ -170,7 +170,7 @@ public class BffController {
     public ResponseEntity<?> guardarNota(@RequestBody Map<String, Object> nota) {
         try {
             var saved = webClientBuilder
-                    .baseUrl("http://localhost:8082")
+                    .baseUrl("http://academico-ms:8082")
                     .build()
                     .post()
                     .uri("/api/academico")
@@ -190,7 +190,7 @@ public class BffController {
     public ResponseEntity<List<Map>> listarNotas(@PathVariable String alumnoId) {
         try {
             List<Map> notas = webClientBuilder
-                    .baseUrl("http://localhost:8082")
+                    .baseUrl("http://academico-ms:8082")
                     .build()
                     .get()
                     .uri("/api/academico/alumno/" + alumnoId)

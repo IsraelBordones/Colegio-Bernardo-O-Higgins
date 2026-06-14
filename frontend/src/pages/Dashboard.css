@@ -1,87 +1,87 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #f0f4f8;
-  color: #2d3748;
-}
-
 .dashboard-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: #f0f4f8;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 /* HEADER */
 .dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: #1a3a5c;
   color: white;
-  padding: 14px 28px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  padding: 0 28px;
+  height: 56px;
+  flex-shrink: 0;
 }
-
 .header-brand h1 {
   font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: 0.3px;
 }
-
 .header-user {
   display: flex;
   align-items: center;
   gap: 12px;
   font-size: 0.9rem;
 }
-
-.badge {
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.badge-alumno { background: #3b82f6; }
-.badge-profesor { background: #10b981; }
-
 .btn-logout {
   background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.3);
   color: white;
-  padding: 6px 14px;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 5px 14px;
   border-radius: 6px;
-  cursor: pointer;
   font-size: 0.85rem;
+  cursor: pointer;
   transition: background 0.2s;
 }
-
 .btn-logout:hover { background: rgba(255,255,255,0.25); }
+
+/* BADGES ROL */
+.badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.badge-alumno { background: #38a169; color: white; }
+.badge-profesor { background: #d69e2e; color: white; }
+
+/* MAIN ALUMNO */
+.dashboard-main {
+  flex: 1;
+  padding: 28px;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+}
 
 /* STATS */
 .stats-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
-
 .stat-card {
   background: white;
   border-radius: 10px;
-  padding: 20px 28px;
+  padding: 20px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  flex: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
-
 .stat-value {
   font-size: 2rem;
   font-weight: 700;
   color: #1a3a5c;
 }
-
 .stat-label {
   font-size: 0.8rem;
   color: #718096;
@@ -89,101 +89,140 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
-.text-success { color: #10b981; }
-.text-danger { color: #ef4444; }
+.text-success { color: #38a169 !important; }
+.text-danger  { color: #e53e3e !important; }
 
 /* TABS */
 .tabs {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   margin-bottom: 20px;
-  border-bottom: 2px solid #e2e8f0;
 }
-
 .tab-btn {
-  padding: 10px 20px;
-  background: none;
-  border: none;
-  border-bottom: 3px solid transparent;
-  margin-bottom: -2px;
-  cursor: pointer;
-  font-size: 0.9rem;
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: white;
   color: #718096;
+  font-size: 0.9rem;
   font-weight: 500;
+  cursor: pointer;
   transition: all 0.2s;
 }
-
 .tab-btn.active {
-  color: #2e6da4;
-  border-bottom-color: #2e6da4;
-  font-weight: 600;
+  background: #2e6da4;
+  color: white;
+  border-color: #2e6da4;
 }
+.tab-btn:hover:not(.active) { background: #f7fafc; }
 
-/* TABLE */
+/* TABLA */
 .table-wrapper {
-  overflow-x: auto;
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
   background: white;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
-
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
 .data-table th {
   background: #f7fafc;
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 0.8rem;
-  color: #718096;
+  color: #4a5568;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  padding: 12px 16px;
+  text-align: left;
   border-bottom: 1px solid #e2e8f0;
 }
-
 .data-table td {
   padding: 12px 16px;
   border-bottom: 1px solid #f0f4f8;
-  font-size: 0.9rem;
+  color: #2d3748;
 }
-
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr:hover td { background: #f7fafc; }
 
-/* BADGES */
-.nota-badge, .asistencia-badge {
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 0.82rem;
+/* BADGES NOTA Y ASISTENCIA */
+.nota-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 20px;
   font-weight: 600;
+  font-size: 0.9rem;
 }
-
 .nota-badge.aprobado { background: #d1fae5; color: #065f46; }
 .nota-badge.reprobado { background: #fee2e2; color: #991b1b; }
 
-.asistencia-badge.presente { background: #d1fae5; color: #065f46; }
-.asistencia-badge.ausente { background: #fee2e2; color: #991b1b; }
+.asistencia-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.asistencia-badge.presente   { background: #d1fae5; color: #065f46; }
+.asistencia-badge.ausente    { background: #fee2e2; color: #991b1b; }
 .asistencia-badge.justificado { background: #fef3c7; color: #92400e; }
 
-/* MISC */
-.loading {
-  text-align: center;
-  padding: 40px;
+/* ESTADOS */
+.loading  { padding: 40px; text-align: center; color: #718096; }
+.empty-msg { padding: 24px; text-align: center; color: #a0aec0; font-size: 0.9rem; }
+
+/* TARJETAS ASIGNATURA (vista alumno agrupada) */
+.asignatura-card {
+  border: 0.5px solid #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.asignatura-card .table-wrapper {
+  box-shadow: none;
+  border-radius: 0;
+}
+.asignatura-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-bottom: 0.5px solid #e0e0e0;
+}
+.asignatura-nombre {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a3a5c;
+}
+.promedio-badge {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.promedio-badge.aprobado { background: #d4edda; color: #155724; }
+.promedio-badge.reprobado { background: #f8d7da; color: #721c24; }
+
+.asignatura-header.clickable {
+  cursor: pointer;
+  user-select: none;
+}
+.asignatura-header.clickable:hover {
+  background: #eef2f7;
+}
+.asignatura-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.asignatura-chevron {
+  font-size: 11px;
   color: #718096;
 }
-
-.empty-msg {
-  text-align: center;
-  padding: 40px;
+.asignatura-count {
+  font-size: 12px;
   color: #a0aec0;
-  font-style: italic;
-}
-
-.dashboard-main {
-  padding: 28px;
-  flex: 1;
 }
