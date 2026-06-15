@@ -60,7 +60,7 @@ class AsistenciaControllerTest {
         mockMvc.perform(post("/api/asistencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(asistencia)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.presente").value(true));
     }
 
@@ -72,7 +72,7 @@ class AsistenciaControllerTest {
         mockMvc.perform(post("/api/asistencia")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(asistencia)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.presente").value(false));
     }
 

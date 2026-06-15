@@ -140,8 +140,9 @@ public class BffController {
 
             return ResponseEntity.ok(saved);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error registrando asistencia");
+                    .body("Error registrando asistencia: " + e.getMessage());
         }
     }
 
@@ -181,8 +182,9 @@ public class BffController {
 
             return ResponseEntity.ok(saved);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error guardando nota");
+                    .body("Error guardando nota: " + e.getMessage());
         }
     }
 

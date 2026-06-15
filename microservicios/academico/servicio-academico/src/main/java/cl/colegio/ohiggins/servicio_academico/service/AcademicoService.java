@@ -6,9 +6,11 @@ import cl.colegio.ohiggins.servicio_academico.repository.AcademicoRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@Transactional
 public class AcademicoService {
     @Autowired
     private AcademicoRepository repository;

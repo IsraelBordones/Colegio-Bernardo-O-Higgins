@@ -16,6 +16,7 @@ public class Asistencia {
     private String alumnoId;
     private String fecha; // YYYY-MM-DD
     private boolean presente;
+    private String estado; // PRESENTE, AUSENTE, JUSTIFICADO
     private String observaciones;
     private String asignatura;
 
@@ -51,6 +52,14 @@ public class Asistencia {
 
     public void setPresente(boolean presente) {
         this.presente = presente;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 
     public String getAsignatura() { return asignatura; }

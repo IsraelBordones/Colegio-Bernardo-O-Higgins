@@ -60,7 +60,7 @@ class AcademicoControllerTest {
         mockMvc.perform(post("/api/academico")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(nota)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.calificacion").value(6.5));
     }
 
@@ -84,7 +84,7 @@ class AcademicoControllerTest {
         mockMvc.perform(post("/api/academico")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(notaBaja)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.calificacion").value(2.0));
     }
 
