@@ -34,18 +34,23 @@ Sigue estos pasos para levantar el entorno completo:
     cd Colegio-Bernardo-O-Higgins
     ```
 
-2.  **Cambiar a la rama de desarrollo:**
-    ```bash
-    git checkout develop
-    ```
 
-3.  **Levantar los servicios con Docker:**
+2.  **Levantar los servicios con Docker:**
     Asegúrate de que Docker Desktop esté abierto y ejecuta:
     ```bash
     docker compose up --build -d
     ```
 
-4.  **Acceder al Sistema:**
+    
+3.  **Acceder al Sistema:**
+    Irse a la carpeta frontend y escribir en consola
+    ```bash
+    npm install && npm start
+    ```
+    esto ejecutara la aplicación por completo
+
+
+5.  **Acceder al Sistema:**
     * **Frontend**: Abre el archivo `frontend/index.html` en tu navegador (o usa la extensión *Live Server* de VS Code).
     * **BFF (API Gateway)**: `http://localhost:8080`
     * **Microservicio Usuarios**: `http://localhost:8081`
