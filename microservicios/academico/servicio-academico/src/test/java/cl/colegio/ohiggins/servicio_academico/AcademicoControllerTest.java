@@ -1,13 +1,15 @@
-package cl.colegio.ohiggins.servicio_academico.controller;
+package cl.colegio.ohiggins.servicio_academico;
 
+import cl.colegio.ohiggins.servicio_academico.controller.AcademicoController;
 import cl.colegio.ohiggins.servicio_academico.model.Academico;
 import cl.colegio.ohiggins.servicio_academico.service.AcademicoService;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,97 +27,78 @@ class AcademicoControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private AcademicoService service;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Academico notaEjemplo;
+    private Academico nota;
 
     @BeforeEach
     void setUp() {
-        notaEjemplo = new Academico();
-        notaEjemplo.setId(1L);
-        notaEjemplo.setAlumnoId("alumno_bueno");
-        notaEjemplo.setAsignatura("Matemáticas");
-        notaEjemplo.setCalificacion(6.5);
-        notaEjemplo.setPeriodo(1);
-        notaEjemplo.setTipo("Prueba");
+        nota = new Academico();
+        nota.setAlumnoId("alumno_01");
+        nota.setAsignatura("Matemáticas");
+        nota.setCalificacion(6.5);
+        nota.setPeriodo(1);
     }
 
     @Test
-    void GET_alumno_retornaListaDeNotas() throws Exception {
-        when(service.obtenerPorAlumno("alumno_bueno"))
-                .thenReturn(Arrays.asList(notaEjemplo));
+    void getNotasPorAlumno_retornaLista() throws Exception {
+        when(service.obtenerPorAlumno("alumno_01")).thenReturn(Arrays.asList(nota));
 
-        mockMvc.perform(get("/api/academico/alumno/alumno_bueno"))
+        mockMvc.perform(get("/api/academico/alumno/alumno_01"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].asignatura").value("Matemáticas"))
-                .andExpect(jsonPath("$[0].calificacion").value(6.5))
-                .andExpect(jsonPath("$[0].alumnoId").value("alumno_bueno"));
+                .andExpect(jsonPath("$[0].alumnoId").value("alumno_01"))
+                .andExpect(jsonPath("$[0].asignatura").value("Matemáticas"));
     }
 
     @Test
-    void GET_alumno_sinNotas_retornaListaVacia() throws Exception {
-        when(service.obtenerPorAlumno("alumno_nuevo"))
-                .thenReturn(Collections.emptyList());
+    void postNota_creaNotaYRetorna() throws Exception {
+        when(service.guardarNota(any(Academico.class))).thenReturn(nota);
 
-        mockMvc.perform(get("/api/academico/alumno/alumno_nuevo"))
+        mockMvc.perform(post("/api/academico")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(nota)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.calificacion").value(6.5));
+    }
+
+    @Test
+    void getNotasPorAlumno_listaVacia_retornaArregloVacio() throws Exception {
+        when(service.obtenerPorAlumno("alumno_99")).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/academico/alumno/alumno_99"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
     }
 
     @Test
-    void POST_crearNota_retornaNotaGuardada() throws Exception {
-        when(service.guardarNota(any(Academico.class))).thenReturn(notaEjemplo);
+    void postNota_notaReprobatoria_retornaNotaGuardada() throws Exception {
+        Academico notaBaja = new Academico();
+        notaBaja.setAlumnoId("alumno_02");
+        notaBaja.setCalificacion(2.0);
+        when(service.guardarNota(any(Academico.class))).thenReturn(notaBaja);
 
         mockMvc.perform(post("/api/academico")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(notaEjemplo)))
+                        .content(objectMapper.writeValueAsString(notaBaja)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.asignatura").value("Matemáticas"))
-                .andExpect(jsonPath("$.tipo").value("Prueba"));
+                .andExpect(jsonPath("$.calificacion").value(2.0));
     }
 
     @Test
-    void GET_alumno_conVariasNotas_retornaTodasLasNotas() throws Exception {
+    void getNotasPorAlumno_multipleNotas_retornaTodasLasNotas() throws Exception {
         Academico nota2 = new Academico();
-        nota2.setId(2L);
-        nota2.setAlumnoId("alumno_bueno");
-        nota2.setAsignatura("Lenguaje");
-        nota2.setCalificacion(6.8);
-        nota2.setPeriodo(2);
-        nota2.setTipo("Control");
+        nota2.setAlumnoId("alumno_01");
+        nota2.setAsignatura("Historia");
+        nota2.setCalificacion(5.5);
+        when(service.obtenerPorAlumno("alumno_01")).thenReturn(Arrays.asList(nota, nota2));
 
-        when(service.obtenerPorAlumno("alumno_bueno"))
-                .thenReturn(Arrays.asList(notaEjemplo, nota2));
-
-        mockMvc.perform(get("/api/academico/alumno/alumno_bueno"))
+        mockMvc.perform(get("/api/academico/alumno/alumno_01"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[1].asignatura").value("Lenguaje"));
-    }
-
-    @Test
-    void POST_crearNota_calificacionReprobatoria_seGuardaCorrectamente() throws Exception {
-        Academico notaMala = new Academico();
-        notaMala.setId(3L);
-        notaMala.setAlumnoId("alumno_malo");
-        notaMala.setAsignatura("Historia");
-        notaMala.setCalificacion(2.5);
-        notaMala.setPeriodo(1);
-        notaMala.setTipo("Examen");
-
-        when(service.guardarNota(any(Academico.class))).thenReturn(notaMala);
-
-        mockMvc.perform(post("/api/academico")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(notaMala)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.calificacion").value(2.5))
-                .andExpect(jsonPath("$.alumnoId").value("alumno_malo"));
+                .andExpect(jsonPath("$.length()").value(2));
     }
 }

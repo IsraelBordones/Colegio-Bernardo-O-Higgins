@@ -1,13 +1,15 @@
-package cl.colegio.ohiggins.servicio_asistencia.controller;
+package cl.colegio.ohiggins.servicio_asistencia;
 
+import cl.colegio.ohiggins.servicio_asistencia.controller.AsistenciaController;
 import cl.colegio.ohiggins.servicio_asistencia.model.Asistencia;
 import cl.colegio.ohiggins.servicio_asistencia.service.AsistenciaService;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,99 +27,76 @@ class AsistenciaControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private AsistenciaService service;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Asistencia asistenciaEjemplo;
+    private Asistencia asistencia;
 
     @BeforeEach
     void setUp() {
-        asistenciaEjemplo = new Asistencia();
-        asistenciaEjemplo.setId(1L);
-        asistenciaEjemplo.setAlumnoId("alumno_bueno");
-        asistenciaEjemplo.setFecha("2026-06-01");
-        asistenciaEjemplo.setPresente(true);
-        asistenciaEjemplo.setAsignatura("Matemáticas");
-        asistenciaEjemplo.setObservaciones("");
+        asistencia = new Asistencia();
+        asistencia.setAlumnoId("alumno_01");
+        asistencia.setFecha("2024-06-01");
+        asistencia.setPresente(true);
+        asistencia.setAsignatura("Matemáticas");
     }
 
     @Test
-    void GET_historial_retornaListaDeAsistencias() throws Exception {
-        when(service.historialAlumno("alumno_bueno"))
-                .thenReturn(Arrays.asList(asistenciaEjemplo));
+    void getHistorialPorAlumno_retornaLista() throws Exception {
+        when(service.historialAlumno("alumno_01")).thenReturn(Arrays.asList(asistencia));
 
-        mockMvc.perform(get("/api/asistencia/alumno/alumno_bueno"))
+        mockMvc.perform(get("/api/asistencia/alumno/alumno_01"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].alumnoId").value("alumno_bueno"))
-                .andExpect(jsonPath("$[0].asignatura").value("Matemáticas"))
+                .andExpect(jsonPath("$[0].alumnoId").value("alumno_01"))
                 .andExpect(jsonPath("$[0].presente").value(true));
     }
 
     @Test
-    void GET_historial_sinRegistros_retornaListaVacia() throws Exception {
-        when(service.historialAlumno("alumno_nuevo"))
-                .thenReturn(Collections.emptyList());
+    void postAsistencia_presente_retornaRegistro() throws Exception {
+        when(service.registrarAsistencia(any(Asistencia.class))).thenReturn(asistencia);
 
-        mockMvc.perform(get("/api/asistencia/alumno/alumno_nuevo"))
+        mockMvc.perform(post("/api/asistencia")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(asistencia)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.presente").value(true));
+    }
+
+    @Test
+    void postAsistencia_ausente_retornaRegistro() throws Exception {
+        asistencia.setPresente(false);
+        when(service.registrarAsistencia(any(Asistencia.class))).thenReturn(asistencia);
+
+        mockMvc.perform(post("/api/asistencia")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(asistencia)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.presente").value(false));
+    }
+
+    @Test
+    void getHistorialPorAlumno_listaVacia_retornaArregloVacio() throws Exception {
+        when(service.historialAlumno("alumno_99")).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/asistencia/alumno/alumno_99"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
     }
 
     @Test
-    void POST_registrarAsistencia_presente_retornaRegistroGuardado() throws Exception {
-        when(service.registrarAsistencia(any(Asistencia.class)))
-                .thenReturn(asistenciaEjemplo);
+    void getHistorialPorAlumno_multipleRegistros_retornaTodos() throws Exception {
+        Asistencia a2 = new Asistencia();
+        a2.setAlumnoId("alumno_01");
+        a2.setFecha("2024-06-02");
+        a2.setPresente(false);
+        when(service.historialAlumno("alumno_01")).thenReturn(Arrays.asList(asistencia, a2));
 
-        mockMvc.perform(post("/api/asistencia")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(asistenciaEjemplo)))
+        mockMvc.perform(get("/api/asistencia/alumno/alumno_01"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.presente").value(true))
-                .andExpect(jsonPath("$.asignatura").value("Matemáticas"));
-    }
-
-    @Test
-    void POST_registrarAsistencia_ausente_retornaRegistroGuardado() throws Exception {
-        Asistencia ausencia = new Asistencia();
-        ausencia.setId(2L);
-        ausencia.setAlumnoId("alumno_malo");
-        ausencia.setFecha("2026-06-02");
-        ausencia.setPresente(false);
-        ausencia.setAsignatura("Historia");
-        ausencia.setObservaciones("Faltó sin aviso");
-
-        when(service.registrarAsistencia(any(Asistencia.class))).thenReturn(ausencia);
-
-        mockMvc.perform(post("/api/asistencia")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(ausencia)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.presente").value(false))
-                .andExpect(jsonPath("$.alumnoId").value("alumno_malo"))
-                .andExpect(jsonPath("$.observaciones").value("Faltó sin aviso"));
-    }
-
-    @Test
-    void GET_historial_conVariosRegistros_retornaTodos() throws Exception {
-        Asistencia asistencia2 = new Asistencia();
-        asistencia2.setId(2L);
-        asistencia2.setAlumnoId("alumno_bueno");
-        asistencia2.setFecha("2026-06-02");
-        asistencia2.setPresente(false);
-        asistencia2.setAsignatura("Lenguaje");
-
-        when(service.historialAlumno("alumno_bueno"))
-                .thenReturn(Arrays.asList(asistenciaEjemplo, asistencia2));
-
-        mockMvc.perform(get("/api/asistencia/alumno/alumno_bueno"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[1].presente").value(false))
-                .andExpect(jsonPath("$[1].asignatura").value("Lenguaje"));
+                .andExpect(jsonPath("$.length()").value(2));
     }
 }

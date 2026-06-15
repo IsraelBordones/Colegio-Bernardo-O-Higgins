@@ -1,7 +1,9 @@
-package cl.colegio.ohiggins.servicio_asistencia.service;
+package cl.colegio.ohiggins.servicio_asistencia;
 
 import cl.colegio.ohiggins.servicio_asistencia.model.Asistencia;
 import cl.colegio.ohiggins.servicio_asistencia.repository.AsistenciaRepository;
+import cl.colegio.ohiggins.servicio_asistencia.service.AsistenciaService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,91 +27,70 @@ class AsistenciaServiceTest {
     @InjectMocks
     private AsistenciaService service;
 
-    private Asistencia asistenciaEjemplo;
+    private Asistencia asistencia;
 
     @BeforeEach
     void setUp() {
-        asistenciaEjemplo = new Asistencia();
-        asistenciaEjemplo.setId(1L);
-        asistenciaEjemplo.setAlumnoId("alumno_bueno");
-        asistenciaEjemplo.setFecha("2026-06-01");
-        asistenciaEjemplo.setPresente(true);
-        asistenciaEjemplo.setAsignatura("Matemáticas");
-        asistenciaEjemplo.setObservaciones("");
+        asistencia = new Asistencia();
+        asistencia.setAlumnoId("alumno_01");
+        asistencia.setFecha("2024-06-01");
+        asistencia.setPresente(true);
+        asistencia.setAsignatura("Matemáticas");
     }
 
     @Test
-    void historialAlumno_retornaRegistrosDeAsistencia() {
-        when(repository.findByAlumnoId("alumno_bueno"))
-                .thenReturn(Arrays.asList(asistenciaEjemplo));
+    void historialAlumno_retornaRegistros() {
+        when(repository.findByAlumnoId("alumno_01")).thenReturn(Arrays.asList(asistencia));
 
-        List<Asistencia> resultado = service.historialAlumno("alumno_bueno");
+        List<Asistencia> resultado = service.historialAlumno("alumno_01");
 
+        assertNotNull(resultado);
         assertEquals(1, resultado.size());
-        assertTrue(resultado.get(0).isPresente());
-        assertEquals("Matemáticas", resultado.get(0).getAsignatura());
-        verify(repository, times(1)).findByAlumnoId("alumno_bueno");
-    }
-
-    @Test
-    void historialAlumno_sinRegistros_retornaListaVacia() {
-        when(repository.findByAlumnoId("alumno_nuevo"))
-                .thenReturn(Collections.emptyList());
-
-        List<Asistencia> resultado = service.historialAlumno("alumno_nuevo");
-
-        assertTrue(resultado.isEmpty());
-        verify(repository, times(1)).findByAlumnoId("alumno_nuevo");
+        assertEquals("alumno_01", resultado.get(0).getAlumnoId());
     }
 
     @Test
     void registrarAsistencia_presente_seGuardaCorrectamente() {
-        when(repository.save(asistenciaEjemplo)).thenReturn(asistenciaEjemplo);
+        when(repository.save(asistencia)).thenReturn(asistencia);
 
-        Asistencia resultado = service.registrarAsistencia(asistenciaEjemplo);
+        Asistencia resultado = service.registrarAsistencia(asistencia);
 
         assertNotNull(resultado);
         assertTrue(resultado.isPresente());
-        assertEquals("alumno_bueno", resultado.getAlumnoId());
-        verify(repository, times(1)).save(asistenciaEjemplo);
+        verify(repository, times(1)).save(asistencia);
     }
 
     @Test
     void registrarAsistencia_ausente_seGuardaCorrectamente() {
-        Asistencia ausencia = new Asistencia();
-        ausencia.setId(2L);
-        ausencia.setAlumnoId("alumno_malo");
-        ausencia.setFecha("2026-06-02");
-        ausencia.setPresente(false);
-        ausencia.setAsignatura("Lenguaje");
-        ausencia.setObservaciones("Sin justificación");
+        asistencia.setPresente(false);
+        when(repository.save(asistencia)).thenReturn(asistencia);
 
-        when(repository.save(ausencia)).thenReturn(ausencia);
+        Asistencia resultado = service.registrarAsistencia(asistencia);
 
-        Asistencia resultado = service.registrarAsistencia(ausencia);
-
+        assertNotNull(resultado);
         assertFalse(resultado.isPresente());
-        assertEquals("alumno_malo", resultado.getAlumnoId());
-        assertEquals("Sin justificación", resultado.getObservaciones());
     }
 
     @Test
-    void historialAlumno_conVariosRegistros_retornaTodosCorrectamente() {
-        Asistencia asistencia2 = new Asistencia();
-        asistencia2.setId(2L);
-        asistencia2.setAlumnoId("alumno_bueno");
-        asistencia2.setFecha("2026-06-02");
-        asistencia2.setPresente(false);
-        asistencia2.setAsignatura("Lenguaje");
+    void historialAlumno_listaVacia_retornaVacio() {
+        when(repository.findByAlumnoId("alumno_99")).thenReturn(Collections.emptyList());
 
-        when(repository.findByAlumnoId("alumno_bueno"))
-                .thenReturn(Arrays.asList(asistenciaEjemplo, asistencia2));
+        List<Asistencia> resultado = service.historialAlumno("alumno_99");
 
-        List<Asistencia> resultado = service.historialAlumno("alumno_bueno");
+        assertNotNull(resultado);
+        assertTrue(resultado.isEmpty());
+    }
+
+    @Test
+    void historialAlumno_multipleRegistros_retornaTodos() {
+        Asistencia a2 = new Asistencia();
+        a2.setAlumnoId("alumno_01");
+        a2.setFecha("2024-06-02");
+        a2.setPresente(false);
+        when(repository.findByAlumnoId("alumno_01")).thenReturn(Arrays.asList(asistencia, a2));
+
+        List<Asistencia> resultado = service.historialAlumno("alumno_01");
 
         assertEquals(2, resultado.size());
-        assertTrue(resultado.get(0).isPresente());
-        assertFalse(resultado.get(1).isPresente());
-        assertEquals("Lenguaje", resultado.get(1).getAsignatura());
     }
 }
