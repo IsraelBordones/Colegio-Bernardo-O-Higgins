@@ -1,5 +1,6 @@
 package cl.colegio.ohiggins.servicio_usuarios.seed;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Component
+@Profile("!test")
 public class UsuariosDataSeeder {
 
     private final JdbcTemplate jdbcTemplate;
