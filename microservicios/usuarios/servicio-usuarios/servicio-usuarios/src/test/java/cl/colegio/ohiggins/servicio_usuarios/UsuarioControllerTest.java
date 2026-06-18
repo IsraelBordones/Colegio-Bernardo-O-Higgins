@@ -1,4 +1,4 @@
-package cl.colegio.ohiggins.servicio_usuarios.controller;
+package cl.colegio.ohiggins.servicio_usuarios;
 
 import cl.colegio.ohiggins.servicio_usuarios.config.SecurityConfig;
 import cl.colegio.ohiggins.servicio_usuarios.controller.UsuarioController;
@@ -58,6 +58,10 @@ class UsuarioControllerTest {
         profesor.setCursoId(1);
     }
 
+    // =========================================================
+    // GET /api/usuarios
+    // =========================================================
+
     @Test
     void GET_listar_retornaListaDeUsuarios() throws Exception {
         when(usuarioService.obtenerTodos()).thenReturn(Arrays.asList(alumno, profesor));
@@ -79,6 +83,20 @@ class UsuarioControllerTest {
     }
 
     @Test
+    void GET_listar_verificaRolYNombre() throws Exception {
+        when(usuarioService.obtenerTodos()).thenReturn(Arrays.asList(alumno));
+
+        mockMvc.perform(get("/api/usuarios"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].role").value("alumno"))
+                .andExpect(jsonPath("$[0].nombre").value("Alumno Bueno"));
+    }
+
+    // =========================================================
+    // GET /api/usuarios/alumnos?cursoId=
+    // =========================================================
+
+    @Test
     void GET_alumnosPorCurso_retornaAlumnosDelCurso() throws Exception {
         when(usuarioService.listarAlumnosPorCursoId(1)).thenReturn(Arrays.asList(alumno));
 
@@ -89,7 +107,33 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void POST_login_credencialesCorrectas_retornaUsuario() throws Exception {
+    void GET_alumnosPorCurso_sinAlumnos_retornaListaVacia() throws Exception {
+        when(usuarioService.listarAlumnosPorCursoId(99)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/usuarios/alumnos").param("cursoId", "99"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void GET_alumnosPorCurso_multipleAlumnos_retornaTodos() throws Exception {
+        Usuario alumno2 = new Usuario();
+        alumno2.setUsername("alumno_dos");
+        alumno2.setRole("alumno");
+        alumno2.setCursoId(1);
+        when(usuarioService.listarAlumnosPorCursoId(1)).thenReturn(Arrays.asList(alumno, alumno2));
+
+        mockMvc.perform(get("/api/usuarios/alumnos").param("cursoId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    // =========================================================
+    // POST /api/usuarios/login
+    // =========================================================
+
+    @Test
+    void POST_login_credencialesCorrectas_retorna200ConDatosUsuario() throws Exception {
         when(usuarioService.autenticar("alumno_bueno", "1234")).thenReturn(alumno);
 
         Map<String, String> loginData = Map.of("username", "alumno_bueno", "password", "1234");
@@ -97,7 +141,10 @@ class UsuarioControllerTest {
         mockMvc.perform(post("/api/usuarios/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginData)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("alumno_bueno"))
+                .andExpect(jsonPath("$.role").value("alumno"))
+                .andExpect(jsonPath("$.nombre").value("Alumno Bueno"));
     }
 
     @Test
@@ -108,8 +155,58 @@ class UsuarioControllerTest {
 
         mockMvc.perform(post("/api/usuarios/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginData)));
+                        .content(objectMapper.writeValueAsString(loginData)))
+                .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void POST_login_usuarioInexistente_retorna401() throws Exception {
+        when(usuarioService.autenticar("fantasma", "1234")).thenReturn(null);
+
+        Map<String, String> loginData = Map.of("username", "fantasma", "password", "1234");
+
+        mockMvc.perform(post("/api/usuarios/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginData)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void POST_login_sinUsername_retorna401() throws Exception {
+        Map<String, String> loginData = Map.of("password", "1234");
+
+        mockMvc.perform(post("/api/usuarios/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginData)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void POST_login_sinPassword_retorna401() throws Exception {
+        Map<String, String> loginData = Map.of("username", "alumno_bueno");
+
+        mockMvc.perform(post("/api/usuarios/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginData)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void POST_login_loginProfesor_retornaRolProfesor() throws Exception {
+        when(usuarioService.autenticar("profe1", "profesor123")).thenReturn(profesor);
+
+        Map<String, String> loginData = Map.of("username", "profe1", "password", "profesor123");
+
+        mockMvc.perform(post("/api/usuarios/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginData)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("PROFESOR"));
+    }
+
+    // =========================================================
+    // POST /api/usuarios
+    // =========================================================
 
     @Test
     void POST_guardarUsuario_retornaUsuarioCreado() throws Exception {
@@ -120,6 +217,30 @@ class UsuarioControllerTest {
                         .content(objectMapper.writeValueAsString(alumno)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("alumno_bueno"))
-                .andExpect(jsonPath("$.nombre").value("Alumno Bueno"));
+                .andExpect(jsonPath("$.nombre").value("Alumno Bueno"))
+                .andExpect(jsonPath("$.role").value("alumno"));
+    }
+
+    @Test
+    void POST_guardarProfesor_retornaProfesorCreado() throws Exception {
+        when(usuarioService.crearUsuario(any(Usuario.class))).thenReturn(profesor);
+
+        mockMvc.perform(post("/api/usuarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(profesor)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("PROFESOR"))
+                .andExpect(jsonPath("$.username").value("profe1"));
+    }
+
+    @Test
+    void POST_guardarUsuario_verificaCursoId() throws Exception {
+        when(usuarioService.crearUsuario(any(Usuario.class))).thenReturn(alumno);
+
+        mockMvc.perform(post("/api/usuarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(alumno)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cursoId").value(1));
     }
 }
