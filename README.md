@@ -8,7 +8,7 @@ El sistema está compuesto por:
 * **Frontend**: Interfaz web construida con HTML5, CSS3 (Bootstrap 5) y JavaScript Vainilla.
 * **BFF (Backend For Frontend)**: Orquestador de microservicios construido en Spring Boot.
 * **Servicio Usuarios**: Microservicio encargado de la persistencia de alumnos y personal en MongoDB.
-* **Base de Datos**: MongoDB (NoSQL) para un almacenamiento flexible de documentos.
+* **Base de Datos**: MySQL para un almacenamiento eficaz de datos.
 
 ---
 
